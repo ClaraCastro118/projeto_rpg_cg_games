@@ -1,4 +1,4 @@
-# Sistema de Criação de Personagens - CB Games
+# Sistema de Criação de Personagens - CG Games
 
 Projeto desenvolvido em dupla para o desafio de criação de um software desktop de login e personalização de avatares/personagens, utilizando Python e SQLite.
 
