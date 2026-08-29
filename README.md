@@ -30,6 +30,7 @@ projeto_rpg_cg_games/
 ├── README.md
 ├── database.db           # Banco de dados SQLite local (gerado automaticamente)
 └── main.py               # Ponto de entrada (Entry Point) da aplicação
+```
 
 ---
 
