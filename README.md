@@ -34,14 +34,17 @@ projeto_rpg_cg_games/
 
 ---
 
-## 🕹️ Como Rodar o Projeto
+## 📥 Como Rodar o Projeto na Sua Máquina
 
-### 1. Clonar o Repositório
-Você pode clonar este repositório de forma simples escolhendo uma das opções abaixo:
+Para clonar e executar este projeto localmente, siga os passos abaixo:
 
-* **Opção A (Via Terminal / Git Bash):**
-  Abra o seu terminal na pasta onde deseja salvar o projeto e execute o comando:
-  ```bash
-  git clone [https://github.com/ClaraCastro118/projeto_rpg_cg_games.git](https://github.com/ClaraCastro118/projeto_rpg_cg_games.git)
-  cd projeto_rpg_cg_games
+### 1. Pré-requisitos
+* Ter o **Python** instalado na sua máquina (versão 3.10 ou superior recomendada).
+* Ter o **Git** instalado.
+
+### 2. Clonar o Repositório
+Abra o seu terminal (ou Git Bash) e digite o comando:
+```bash
+git clone [https://github.com/ClaraCastro118/projeto_rpg_cg_games.git](https://github.com/ClaraCastro118/projeto_rpg_cg_games.git)
+
 
