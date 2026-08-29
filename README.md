@@ -1,32 +1,46 @@
-# Sistema de Criação de Personagens - CG Games
+# 🎮 Sistema RPG - CB Games
 
-Projeto desenvolvido em dupla para o desafio de criação de um software desktop de login e personalização de avatares/personagens, utilizando Python e SQLite.
-
-## 🚀 Tecnologias Utilizadas
-
-* **Python** (Lógica principal e sistema)
-* **Tkinter** (Interface Gráfica / GUI)
-* **SQLite** (Banco de dados local)
-
-## 🎯 Funcionalidades do Sistema
-
-* **Tela de Cadastro:** Permite que novos usuários criem uma conta com nome de usuário e senha segura.
-* **Tela de Login:** Validação de credenciais para acesso seguro.
-* **Personalização de Atributos:** Ajuste de características (força, inteligência, cabelo, etc.) em uma escala de 1 a 10.
-* **Persistência de Dados:** Salvamento automático das informações no banco de dados SQLite.
+Projeto desenvolvido em dupla para o desafio de criação de um software desktop modularizado de login, cadastro seguro e gerenciamento de personagens, utilizando **Python**, **Tkinter** e **SQLite**.
 
 ---
 
-## 📥 Como Rodar o Projeto na Sua Máquina
+## 🧑🏻‍🎓 Integrantes do Projeto
+* **Gustavo Geraldo**
+* **Maria Clara Castro**
 
-Para clonar e executar este projeto localmente, siga os passos abaixo:
+---
 
-### 1. Pré-requisitos
-* Ter o **Python** instalado na sua máquina (versão 3.10 ou superior recomendada).
-* Ter o **Git** instalado.
+## 💻⛏️ Tecnologias e Ferramentas Utilizadas
+* **Python** (Lógica principal, criptografia SHA-256 e arquitetura)
+* **Tkinter** (Interface Gráfica / GUI modularizada)
+* **SQLite** (Banco de dados local relacional)
+* **Git & GitHub** (Controle de versão e colaboração em equipe)
 
-### 2. Clonar o Repositório
-Abra o seu terminal (ou Git Bash) e digite o comando:
-```bash
-git clone [https://github.com/ClaraCastro118/projeto_rpg_cg_games.git](https://github.com/ClaraCastro118/projeto_rpg_cg_games.git)
+---
+
+## 🏰 Arquitetura do Projeto
+
+```text
+projeto_rpg_cg_games/
+├── src/
+│   ├── __pycache__/
+│   ├── __init__.py
+│   └── telas.py          # Lógica das telas, banco de dados e criptografia
+├── .gitignore
+├── README.md
+├── database.db           # Banco de dados SQLite local (gerado automaticamente)
+└── main.py               # Ponto de entrada (Entry Point) da aplicação
+
+---
+
+## 🕹️ Como Rodar o Projeto
+
+### 1. Clonar o Repositório
+Você pode clonar este repositório de forma simples escolhendo uma das opções abaixo:
+
+* **Opção A (Via Terminal / Git Bash):**
+  Abra o seu terminal na pasta onde deseja salvar o projeto e execute o comando:
+  ```bash
+  git clone [https://github.com/ClaraCastro118/projeto_rpg_cg_games.git](https://github.com/ClaraCastro118/projeto_rpg_cg_games.git)
+  cd projeto_rpg_cg_games
 
