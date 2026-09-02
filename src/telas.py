@@ -11,19 +11,7 @@ def conectar_banco():
     # usamos "../database.db" para voltar uma pasta e achar o arquivo
     return sqlite3.connect("../database.db")
 
-def inicializar_banco():
-    # Garante que a tabela 'usuarios' existe assim que o app abre
-    conexao = conectar_banco()
-    cursor = conexao.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            senha TEXT NOT NULL
-        )
-    """)
-    conexao.commit()
-    conexao.close()
+
 
 def abrir_tela_principal():
     # Já cria a tabela assim que a tela abre, evitando o erro
