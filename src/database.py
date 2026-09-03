@@ -38,6 +38,8 @@ def inicializar_banco():
     conexao.commit()
     conexao.close()
     
+# Funções de Gerenciamento de Usuário
+
 def cadastrar_usuario(usuario, senha):
     conexao = conectar_banco()
     cursor = conexao.cursor()
