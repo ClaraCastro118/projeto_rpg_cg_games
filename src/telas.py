@@ -1,20 +1,10 @@
-import hashlib
-import sqlite3
 import tkinter as tk
 from tkinter import messagebox
-
-def criptografar_senha(senha):
-    return hashlib.sha256(senha.encode()).hexdigest()
-
-def conectar_banco():
-    # Como o database.db está na raiz do projeto (fora de src), 
-    # usamos "../database.db" para voltar uma pasta e achar o arquivo
-    return sqlite3.connect("../database.db")
-
+from database import inicializar_banco, conectar_banco, criptografar_senha
 
 
 def abrir_tela_principal():
-    # Já cria a tabela assim que a tela abre, evitando o erro
+    # Garante que a tabela existe assim que a tela abre
     inicializar_banco()
     
     janela_login = tk.Tk()
@@ -54,7 +44,7 @@ def abrir_tela_principal():
             messagebox.showinfo("Sucesso", "Login bem-sucedido! Bem-vindo ao jogo.")
             janela_login.destroy()
         else:
-            messagebox.showerror("Acesso Negado", "Usuário não encontrado ou senha incorreta. Clique em 'Cadastrar' se não tiver uma conta.")
+            messagebox.showerror("Acesso Negado", "Usuário não encontrado ou senha incorreta.")
 
     def acao_cadastrar():
         usuario = entry_usuario.get()
@@ -96,6 +86,6 @@ def abrir_tela_principal():
     
     janela_login.mainloop()
 
+
 if __name__ == "__main__":
     abrir_tela_principal()
-
