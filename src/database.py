@@ -10,9 +10,10 @@ def conectar_banco():
     return sqlite3.connect("../database.db")
 
 def inicializar_banco():
-    # Garante que a tabela 'usuarios' existe assim que o app abre
     conexao = conectar_banco()
     cursor = conexao.cursor()
+    
+    # Tabela de Usuários
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,23 +21,22 @@ def inicializar_banco():
             senha TEXT NOT NULL
         )
     """)
-    conexao.commit()
-    conexao.close()
     
-def criacao_persona():
-    conexao = conectar_banco()
-    cursor = conexao.cursor()
+    # Tabela de Persona (vinculada ao usuário pelo usuario_id)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS persona (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
             nome TEXT NOT NULL,
             especialidade TEXT NOT NULL,
             cor_cabelo TEXT NOT NULL,
-            cor_persona TEXT NOT NULL
+            cor_persona TEXT NOT NULL,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
         )
     """)
-    conexao.commit()  # Adicionado para salvar a tabela
-    conexao.close()   # Adicionado para fechar a conexão
+    
+    conexao.commit()
+    conexao.close()
     
 def cadastrar_usuario(usuario, senha):
     conexao = conectar_banco()
@@ -48,7 +48,6 @@ def cadastrar_usuario(usuario, senha):
 def atualizar_usuario(usuario, nova_senha):
     conexao = conectar_banco()
     cursor = conexao.cursor()
-    # Ordem corrigida: primeiro a nova senha, depois o nome do usuário
     cursor.execute("UPDATE usuarios SET senha = ? WHERE nome = ?", (nova_senha, usuario))
     conexao.commit()
     conexao.close()
@@ -57,5 +56,42 @@ def deletar_usuario(usuario):
     conexao = conectar_banco()
     cursor = conexao.cursor()
     cursor.execute("DELETE FROM usuarios WHERE nome = ?", (usuario,))
+    conexao.commit()
+    conexao.close()
+
+# Funções de Gerenciamento de Persona 
+def criar_persona(usuario_id, nome, especialidade, cor_cabelo, cor_persona):
+    conexao = conectar_banco()
+    cursor = conexao.cursor()
+    cursor.execute("""
+        INSERT INTO persona (usuario_id, nome, especialidade, cor_cabelo, cor_persona) 
+        VALUES (?, ?, ?, ?, ?)
+    """, (usuario_id, nome, especialidade, cor_cabelo, cor_persona))
+    conexao.commit()
+    conexao.close()
+
+def buscar_personas_usuario(usuario_id):
+    conexao = conectar_banco()
+    cursor = conexao.cursor()
+    cursor.execute("SELECT * FROM persona WHERE usuario_id = ?", (usuario_id,))
+    resultados = cursor.fetchall()
+    conexao.close()
+    return resultados
+
+def atualizar_persona(persona_id, especialidade, cor_cabelo, cor_persona):
+    conexao = conectar_banco()
+    cursor = conexao.cursor()
+    cursor.execute("""
+        UPDATE persona 
+        SET especialidade = ?, cor_cabelo = ?, cor_persona = ? 
+        WHERE id = ?
+    """, (especialidade, cor_cabelo, cor_persona, persona_id))
+    conexao.commit()
+    conexao.close()
+
+def deletar_persona(persona_id):
+    conexao = conectar_banco()
+    cursor = conexao.cursor()
+    cursor.execute("DELETE FROM persona WHERE id = ?", (persona_id,))
     conexao.commit()
     conexao.close()
