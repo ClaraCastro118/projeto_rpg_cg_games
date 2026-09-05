@@ -36,31 +36,84 @@ def abrir_tela_jogo(usuario_id):
         # Calcula a posição X na tela para eles não ficarem um em cima do outro
         posicao_x = 100 + (indice * 120)
 
+        # --- Validação de cores segura ---
         try:
-            corpo = canvas.create_rectangle(posicao_x - 20, 250, posicao_x + 20, 350, fill=cor_persona, outline="black")
-            cabeca = canvas.create_oval(posicao_x - 25, 210, posicao_x + 25, 260, fill=cor_cabelo, outline="black")
+            janela_jogo.winfo_rgb(cor_persona)
+            cor_roupa = cor_persona
         except tk.TclError:
-            # Proteção caso a cor digitada seja inválida
-            corpo = canvas.create_rectangle(posicao_x - 20, 250, posicao_x + 20, 350, fill="gray", outline="black")
-            cabeca = canvas.create_oval(posicao_x - 25, 210, posicao_x + 25, 260, fill="gray", outline="black")
+            cor_roupa = "gray" # Cor padrão caso a cor da persona seja inválida
 
-        canvas.create_text(posicao_x, 190, text=nome, font=("Arial", 10, "bold"))
+        try:
+            janela_jogo.winfo_rgb(cor_cabelo)
+            cor_cab = cor_cabelo
+        except tk.TclError:
+            cor_cab = "black" # Cor padrão caso a cor do cabelo seja inválida
+        # ---------------------------------
+
+        # 1. PERNAS E SAPATOS (Ficam de fora da animação para manter o pé no chão)
+        canvas.create_rectangle(posicao_x - 15, 310, posicao_x - 5, 350, fill="#2F4F4F", outline="black") # Perna esq
+        canvas.create_rectangle(posicao_x + 5, 310, posicao_x + 15, 350, fill="#2F4F4F", outline="black") # Perna dir
+        canvas.create_rectangle(posicao_x - 20, 340, posicao_x - 3, 350, fill="black") # Sapato esq
+        canvas.create_rectangle(posicao_x + 3, 340, posicao_x + 20, 350, fill="black") # Sapato dir
+
+        # 2. PARTES DO CORPO (Animadas juntas - Tronco e braços)
+        tronco = canvas.create_rectangle(posicao_x - 20, 250, posicao_x + 20, 310, fill=cor_roupa, outline="black")
+        braco_esq = canvas.create_rectangle(posicao_x - 35, 250, posicao_x - 20, 295, fill=cor_roupa, outline="black")
+        braco_dir = canvas.create_rectangle(posicao_x + 20, 250, posicao_x + 35, 295, fill=cor_roupa, outline="black")
+        mao_esq = canvas.create_oval(posicao_x - 33, 290, posicao_x - 22, 305, fill="#FDDBB7", outline="black")
+        mao_dir = canvas.create_oval(posicao_x + 22, 290, posicao_x + 33, 305, fill="#FDDBB7", outline="black")
+
+        # 3. PARTES DA CABEÇA (Animadas juntas - sobem um pouco mais que o corpo)
+        rosto = canvas.create_oval(posicao_x - 25, 200, posicao_x + 25, 255, fill="#FDDBB7", outline="black")
         
-        # Guarda o ID do desenho da cabeça e do corpo deste personagem
-        elementos_animacao.append((cabeca, corpo))
+        # --- CABELO REFATORADO: Estilo "Desenhado / Espetado" ---
+        pontos_cabelo = [
+            posicao_x - 26, 235,  # Base esquerda
+            posicao_x - 35, 205,  # Mecha 1
+            posicao_x - 18, 195,  # Vale 1
+            posicao_x - 15, 175,  # Mecha 2
+            posicao_x - 5, 190,   # Vale 2
+            posicao_x + 8, 170,   # Mecha 3
+            posicao_x + 15, 185,  # Vale 3
+            posicao_x + 28, 175,  # Mecha 4
+            posicao_x + 22, 198,  # Vale 4
+            posicao_x + 35, 215,  # Mecha 5
+            posicao_x + 26, 235,  # Base direita
+            posicao_x + 15, 210,  # Curva da franja (direita)
+            posicao_x + 5, 225,   # Mecha da franja no meio da testa
+            posicao_x - 10, 210,  # Curva da franja (esquerda)
+        ]
+        cabelo = canvas.create_polygon(pontos_cabelo, fill=cor_cab, outline="black", width=1)
+        # --------------------------------------------------------
+
+        olho_esq = canvas.create_oval(posicao_x - 12, 222, posicao_x - 7, 227, fill="black")
+        olho_dir = canvas.create_oval(posicao_x + 7, 222, posicao_x + 12, 227, fill="black")
+        boca = canvas.create_arc(posicao_x - 10, 230, posicao_x + 10, 245, start=190, extent=160, style=tk.ARC, width=2)
+        
+        # Nome ajustado mais para cima (Y de 175 para 155) para não cobrir as mechas
+        texto_nome = canvas.create_text(posicao_x, 155, text=nome, font=("Arial", 10, "bold"))
+
+        # Agrupa os elementos em listas para a animação
+        lista_cabeca = [rosto, cabelo, olho_esq, olho_dir, boca, texto_nome]
+        lista_corpo = [tronco, braco_esq, braco_dir, mao_esq, mao_dir]
+        
+        elementos_animacao.append((lista_cabeca, lista_corpo))
 
     def animar_respiracao(crescendo=True):
-        # Move todos os personagens da lista ao mesmo tempo
-        if crescendo:
-            for cabeca, corpo in elementos_animacao:
-                canvas.move(cabeca, 0, -2)
-                canvas.move(corpo, 0, -1)
-            janela_jogo.after(600, animar_respiracao, False)
-        else:
-            for cabeca, corpo in elementos_animacao:
-                canvas.move(cabeca, 0, 2)
-                canvas.move(corpo, 0, 1)
-            janela_jogo.after(600, animar_respiracao, True)
+        # Determina a direção do movimento (Cabeça sobe 2px, corpo sobe 1px)
+        dy_cabeca = -2 if crescendo else 2
+        dy_corpo = -1 if crescendo else 1
+
+        for partes_cabeca, partes_corpo in elementos_animacao:
+            # Move todas as partes da cabeça
+            for item in partes_cabeca:
+                canvas.move(item, 0, dy_cabeca)
+            # Move todas as partes do corpo
+            for item in partes_corpo:
+                canvas.move(item, 0, dy_corpo)
+                
+        # Alterna o estado (True para False, False para True) repetindo a cada 600ms
+        janela_jogo.after(600, animar_respiracao, not crescendo)
 
     animar_respiracao()
 
