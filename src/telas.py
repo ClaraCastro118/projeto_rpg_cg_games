@@ -17,7 +17,6 @@ def abrir_tela_jogo(usuario_id):
 
     janela_jogo = tk.Toplevel()
     janela_jogo.title("Meu Grupo de Personagens")
-    # Aumentei a largura da janela para caber mais personagens
     janela_jogo.geometry("800x450")
     
     canvas = tk.Canvas(janela_jogo, width=800, height=400, bg="#87CEEB")
@@ -26,14 +25,14 @@ def abrir_tela_jogo(usuario_id):
     # Desenhando o chão verde
     canvas.create_rectangle(0, 350, 800, 400, fill="forestgreen", outline="")
 
-    # Lista para guardar as partes do corpo que vamos animar depois
+    # Listas para guardar elementos que serão animados
     elementos_animacao = []
+    elementos_tchau = [] # Nova lista dedicada ao movimento do braço
 
-    # Laço de repetição: desenha cada personagem com um espaço de 120 pixels entre eles
+    # Laço de repetição: desenha cada personagem
     for indice, p in enumerate(personagens):
         nome, cor_cabelo, cor_persona = p
         
-        # Calcula a posição X na tela para eles não ficarem um em cima do outro
         posicao_x = 100 + (indice * 120)
 
         # --- Validação de cores segura ---
@@ -41,81 +40,91 @@ def abrir_tela_jogo(usuario_id):
             janela_jogo.winfo_rgb(cor_persona)
             cor_roupa = cor_persona
         except tk.TclError:
-            cor_roupa = "gray" # Cor padrão caso a cor da persona seja inválida
+            cor_roupa = "gray"
 
         try:
             janela_jogo.winfo_rgb(cor_cabelo)
             cor_cab = cor_cabelo
         except tk.TclError:
-            cor_cab = "black" # Cor padrão caso a cor do cabelo seja inválida
+            cor_cab = "black"
         # ---------------------------------
 
-        # 1. PERNAS E SAPATOS (Ficam de fora da animação para manter o pé no chão)
-        canvas.create_rectangle(posicao_x - 15, 310, posicao_x - 5, 350, fill="#2F4F4F", outline="black") # Perna esq
-        canvas.create_rectangle(posicao_x + 5, 310, posicao_x + 15, 350, fill="#2F4F4F", outline="black") # Perna dir
-        canvas.create_rectangle(posicao_x - 20, 340, posicao_x - 3, 350, fill="black") # Sapato esq
-        canvas.create_rectangle(posicao_x + 3, 340, posicao_x + 20, 350, fill="black") # Sapato dir
+        # 1. PERNAS E SAPATOS (Ficam parados)
+        canvas.create_rectangle(posicao_x - 15, 310, posicao_x - 5, 350, fill="#2F4F4F", outline="black") 
+        canvas.create_rectangle(posicao_x + 5, 310, posicao_x + 15, 350, fill="#2F4F4F", outline="black") 
+        canvas.create_rectangle(posicao_x - 20, 340, posicao_x - 3, 350, fill="black") 
+        canvas.create_rectangle(posicao_x + 3, 340, posicao_x + 20, 350, fill="black") 
 
-        # 2. PARTES DO CORPO (Animadas juntas - Tronco e braços)
+        # 2. TRONCO E BRAÇO ESQUERDO
         tronco = canvas.create_rectangle(posicao_x - 20, 250, posicao_x + 20, 310, fill=cor_roupa, outline="black")
         braco_esq = canvas.create_rectangle(posicao_x - 35, 250, posicao_x - 20, 295, fill=cor_roupa, outline="black")
-        braco_dir = canvas.create_rectangle(posicao_x + 20, 250, posicao_x + 35, 295, fill=cor_roupa, outline="black")
         mao_esq = canvas.create_oval(posicao_x - 33, 290, posicao_x - 22, 305, fill="#FDDBB7", outline="black")
-        mao_dir = canvas.create_oval(posicao_x + 22, 290, posicao_x + 33, 305, fill="#FDDBB7", outline="black")
 
-        # 3. PARTES DA CABEÇA (Animadas juntas - sobem um pouco mais que o corpo)
+        # 3. CABEÇA E ROSTO
         rosto = canvas.create_oval(posicao_x - 25, 200, posicao_x + 25, 255, fill="#FDDBB7", outline="black")
         
-        # --- CABELO REFATORADO: Estilo "Desenhado / Espetado" ---
         pontos_cabelo = [
-            posicao_x - 26, 235,  # Base esquerda
-            posicao_x - 35, 205,  # Mecha 1
-            posicao_x - 18, 195,  # Vale 1
-            posicao_x - 15, 175,  # Mecha 2
-            posicao_x - 5, 190,   # Vale 2
-            posicao_x + 8, 170,   # Mecha 3
-            posicao_x + 15, 185,  # Vale 3
-            posicao_x + 28, 175,  # Mecha 4
-            posicao_x + 22, 198,  # Vale 4
-            posicao_x + 35, 215,  # Mecha 5
-            posicao_x + 26, 235,  # Base direita
-            posicao_x + 15, 210,  # Curva da franja (direita)
-            posicao_x + 5, 225,   # Mecha da franja no meio da testa
-            posicao_x - 10, 210,  # Curva da franja (esquerda)
+            posicao_x - 26, 235, posicao_x - 35, 205, posicao_x - 18, 195, 
+            posicao_x - 15, 175, posicao_x - 5, 190,  posicao_x + 8, 170,   
+            posicao_x + 15, 185, posicao_x + 28, 175, posicao_x + 22, 198,  
+            posicao_x + 35, 215, posicao_x + 26, 235, posicao_x + 15, 210,  
+            posicao_x + 5, 225,  posicao_x - 10, 210
         ]
         cabelo = canvas.create_polygon(pontos_cabelo, fill=cor_cab, outline="black", width=1)
-        # --------------------------------------------------------
 
         olho_esq = canvas.create_oval(posicao_x - 12, 222, posicao_x - 7, 227, fill="black")
         olho_dir = canvas.create_oval(posicao_x + 7, 222, posicao_x + 12, 227, fill="black")
         boca = canvas.create_arc(posicao_x - 10, 230, posicao_x + 10, 245, start=190, extent=160, style=tk.ARC, width=2)
-        
-        # Nome ajustado mais para cima (Y de 175 para 155) para não cobrir as mechas
         texto_nome = canvas.create_text(posicao_x, 155, text=nome, font=("Arial", 10, "bold"))
 
-        # Agrupa os elementos em listas para a animação
+        # 4. BRAÇO DIREITO DANDO TCHAU
+        braco_dir_borda = canvas.create_line(posicao_x + 20, 260, posicao_x + 45, 230, fill="black", width=16, capstyle=tk.ROUND)
+        braco_dir = canvas.create_line(posicao_x + 20, 260, posicao_x + 45, 230, fill=cor_roupa, width=12, capstyle=tk.ROUND)
+        mao_dir = canvas.create_oval(posicao_x + 38, 218, posicao_x + 52, 232, fill="#FDDBB7", outline="black")
+
+        # Agrupa os elementos
         lista_cabeca = [rosto, cabelo, olho_esq, olho_dir, boca, texto_nome]
-        lista_corpo = [tronco, braco_esq, braco_dir, mao_esq, mao_dir]
+        lista_corpo = [tronco, braco_esq, mao_esq, braco_dir_borda, braco_dir, mao_dir]
         
         elementos_animacao.append((lista_cabeca, lista_corpo))
+        elementos_tchau.append((tronco, braco_dir_borda, braco_dir, mao_dir))
 
+    # Animação 1: Respiração
     def animar_respiracao(crescendo=True):
-        # Determina a direção do movimento (Cabeça sobe 2px, corpo sobe 1px)
         dy_cabeca = -2 if crescendo else 2
         dy_corpo = -1 if crescendo else 1
 
         for partes_cabeca, partes_corpo in elementos_animacao:
-            # Move todas as partes da cabeça
             for item in partes_cabeca:
                 canvas.move(item, 0, dy_cabeca)
-            # Move todas as partes do corpo
             for item in partes_corpo:
                 canvas.move(item, 0, dy_corpo)
                 
-        # Alterna o estado (True para False, False para True) repetindo a cada 600ms
         janela_jogo.after(600, animar_respiracao, not crescendo)
 
+    # Animação 2: Tchau
+    def animar_tchau(estado=True):
+        for tronco, braco_borda, braco, mao in elementos_tchau:
+            c_tronco = canvas.coords(tronco)
+            if not c_tronco:
+                continue
+            ombro_x = c_tronco[2] 
+            ombro_y = c_tronco[1] + 10 
+            
+            if estado: 
+                canvas.coords(braco_borda, ombro_x, ombro_y, ombro_x + 25, ombro_y - 30)
+                canvas.coords(braco, ombro_x, ombro_y, ombro_x + 25, ombro_y - 30)
+                canvas.coords(mao, ombro_x + 18, ombro_y - 38, ombro_x + 32, ombro_y - 24)
+            else: 
+                canvas.coords(braco_borda, ombro_x, ombro_y, ombro_x + 10, ombro_y - 40)
+                canvas.coords(braco, ombro_x, ombro_y, ombro_x + 10, ombro_y - 40)
+                canvas.coords(mao, ombro_x + 3, ombro_y - 48, ombro_x + 17, ombro_y - 34)
+                
+        janela_jogo.after(250, animar_tchau, not estado)
+
+    # Inicia as duas animações em paralelo
     animar_respiracao()
+    animar_tchau()
 
 
 def abrir_tela_personalizacao(usuario_id, nome_usuario):
@@ -216,7 +225,6 @@ def abrir_tela_personalizacao(usuario_id, nome_usuario):
     btn_listar = tk.Button(janela_pers, text="Ver Meus Personagens", command=acao_ver_personagens, bg="blue", fg="white", width=22)
     btn_listar.pack(pady=5)
     
-    # Botão de jogar chama diretamente a tela, sem pedir ID
     btn_jogar = tk.Button(janela_pers, text="🎮 Ver Todos no Jogo", command=lambda: abrir_tela_jogo(usuario_id), bg="purple", fg="white", width=22, font=("Arial", 10, "bold"))
     btn_jogar.pack(pady=10)
     
