@@ -2,15 +2,76 @@ import tkinter as tk
 from tkinter import messagebox
 from database import inicializar_banco, conectar_banco, criptografar_senha, deletar_persona
 
+def abrir_tela_jogo(usuario_id):
+    """Abre o mundo do jogo e renderiza TODOS os personagens do usuário lado a lado."""
+    conexao = conectar_banco()
+    cursor = conexao.cursor()
+    # Pega todos os personagens pertencentes ao usuário logado
+    cursor.execute("SELECT nome, cor_cabelo, cor_persona FROM persona WHERE usuario_id = ?", (usuario_id,))
+    personagens = cursor.fetchall()
+    conexao.close()
+
+    if not personagens:
+        messagebox.showwarning("Aviso", "Você precisa criar e salvar um personagem antes de entrar no jogo!")
+        return
+
+    janela_jogo = tk.Toplevel()
+    janela_jogo.title("Meu Grupo de Personagens")
+    # Aumentei a largura da janela para caber mais personagens
+    janela_jogo.geometry("800x450")
+    
+    canvas = tk.Canvas(janela_jogo, width=800, height=400, bg="#87CEEB")
+    canvas.pack()
+
+    # Desenhando o chão verde
+    canvas.create_rectangle(0, 350, 800, 400, fill="forestgreen", outline="")
+
+    # Lista para guardar as partes do corpo que vamos animar depois
+    elementos_animacao = []
+
+    # Laço de repetição: desenha cada personagem com um espaço de 120 pixels entre eles
+    for indice, p in enumerate(personagens):
+        nome, cor_cabelo, cor_persona = p
+        
+        # Calcula a posição X na tela para eles não ficarem um em cima do outro
+        posicao_x = 100 + (indice * 120)
+
+        try:
+            corpo = canvas.create_rectangle(posicao_x - 20, 250, posicao_x + 20, 350, fill=cor_persona, outline="black")
+            cabeca = canvas.create_oval(posicao_x - 25, 210, posicao_x + 25, 260, fill=cor_cabelo, outline="black")
+        except tk.TclError:
+            # Proteção caso a cor digitada seja inválida
+            corpo = canvas.create_rectangle(posicao_x - 20, 250, posicao_x + 20, 350, fill="gray", outline="black")
+            cabeca = canvas.create_oval(posicao_x - 25, 210, posicao_x + 25, 260, fill="gray", outline="black")
+
+        canvas.create_text(posicao_x, 190, text=nome, font=("Arial", 10, "bold"))
+        
+        # Guarda o ID do desenho da cabeça e do corpo deste personagem
+        elementos_animacao.append((cabeca, corpo))
+
+    def animar_respiracao(crescendo=True):
+        # Move todos os personagens da lista ao mesmo tempo
+        if crescendo:
+            for cabeca, corpo in elementos_animacao:
+                canvas.move(cabeca, 0, -2)
+                canvas.move(corpo, 0, -1)
+            janela_jogo.after(600, animar_respiracao, False)
+        else:
+            for cabeca, corpo in elementos_animacao:
+                canvas.move(cabeca, 0, 2)
+                canvas.move(corpo, 0, 1)
+            janela_jogo.after(600, animar_respiracao, True)
+
+    animar_respiracao()
+
+
 def abrir_tela_personalizacao(usuario_id, nome_usuario):
-    """Abre a tela onde o usuário gerencia suas personas (personagens)."""
     janela_pers = tk.Tk()
     janela_pers.title(f"CB Games - Painel de Personagens ({nome_usuario})")
     janela_pers.geometry("450x560")
     
     tk.Label(janela_pers, text="Criação e Personalização de Personagem", font=("Arial", 12, "bold")).pack(pady=10)
     
-    # Campos de Personalização
     tk.Label(janela_pers, text="Nome do Personagem:").pack()
     entry_nome_p = tk.Entry(janela_pers, width=30)
     entry_nome_p.pack(pady=2)
@@ -19,11 +80,11 @@ def abrir_tela_personalizacao(usuario_id, nome_usuario):
     entry_esp = tk.Entry(janela_pers, width=30)
     entry_esp.pack(pady=2)
     
-    tk.Label(janela_pers, text="Cor do Cabelo:").pack()
+    tk.Label(janela_pers, text="Cor do Cabelo (ex: black, yellow, red):").pack()
     entry_cabelo = tk.Entry(janela_pers, width=30)
     entry_cabelo.pack(pady=2)
     
-    tk.Label(janela_pers, text="Cor da Persona (Pele/Traje):").pack()
+    tk.Label(janela_pers, text="Cor da Persona (Pele/Traje) (ex: blue, green):").pack()
     entry_cor = tk.Entry(janela_pers, width=30)
     entry_cor.pack(pady=2)
     
@@ -72,7 +133,6 @@ def abrir_tela_personalizacao(usuario_id, nome_usuario):
             
         messagebox.showinfo("Seus Personagens", detalhes)
 
-    # Nova função conectada ao botão de exclusão
     def acao_deletar():
         persona_id = entry_id_del.get()
         
@@ -83,7 +143,6 @@ def abrir_tela_personalizacao(usuario_id, nome_usuario):
         try:
             conexao = conectar_banco()
             cursor = conexao.cursor()
-            # Garante que o personagem existe e pertence ao usuário logado por segurança
             cursor.execute("SELECT id FROM persona WHERE id = ? AND usuario_id = ?", (persona_id, usuario_id))
             existe = cursor.fetchone()
             conexao.close()
@@ -92,7 +151,6 @@ def abrir_tela_personalizacao(usuario_id, nome_usuario):
                 messagebox.showwarning("Aviso", "Personagem não encontrado ou não pertence a você.")
                 return
                 
-            # Chama a função de delete que está no seu database.py
             deletar_persona(persona_id)
             messagebox.showinfo("Sucesso", "Personagem excluído com sucesso!")
             entry_id_del.delete(0, tk.END)
@@ -105,7 +163,10 @@ def abrir_tela_personalizacao(usuario_id, nome_usuario):
     btn_listar = tk.Button(janela_pers, text="Ver Meus Personagens", command=acao_ver_personagens, bg="blue", fg="white", width=22)
     btn_listar.pack(pady=5)
     
-    # Elementos visuais para deletar
+    # Botão de jogar chama diretamente a tela, sem pedir ID
+    btn_jogar = tk.Button(janela_pers, text="🎮 Ver Todos no Jogo", command=lambda: abrir_tela_jogo(usuario_id), bg="purple", fg="white", width=22, font=("Arial", 10, "bold"))
+    btn_jogar.pack(pady=10)
+    
     tk.Label(janela_pers, text="ID do Personagem para Excluir:").pack(pady=(10, 0))
     entry_id_del = tk.Entry(janela_pers, width=15)
     entry_id_del.pack(pady=2)
@@ -117,7 +178,6 @@ def abrir_tela_personalizacao(usuario_id, nome_usuario):
 
 
 def abrir_tela_principal():
-    # Garante que as tabelas existem assim que a tela abre
     inicializar_banco()
     
     janela_login = tk.Tk()
@@ -127,12 +187,10 @@ def abrir_tela_principal():
     titulo = tk.Label(janela_login, text="CB Games - RPG", font=("Arial", 16, "bold"))
     titulo.pack(pady=20)
     
-    # Campo de Usuário
     tk.Label(janela_login, text="Nome de Usuário:").pack()
     entry_usuario = tk.Entry(janela_login, width=30)
     entry_usuario.pack(pady=5)
     
-    # Campo de Senha
     tk.Label(janela_login, text="Senha:").pack()
     entry_senha = tk.Entry(janela_login, show="*", width=30)
     entry_senha.pack(pady=5)
@@ -201,7 +259,6 @@ def abrir_tela_principal():
     btn_cadastrar.grid(row=0, column=1, padx=10)
     
     janela_login.mainloop()
-
 
 if __name__ == "__main__":
     abrir_tela_principal()
